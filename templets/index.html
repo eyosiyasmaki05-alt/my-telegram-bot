@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethio Reward Bot</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f9;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #333;
+        }
+        .header {
+            background: linear-gradient(135deg, #0088cc, #005588);
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+            color: white;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .card {
+            background: white;
+            width: 90%;
+            margin-top: -30px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .balance-label { font-size: 14px; color: #888; }
+        .balance-amount { font-size: 32px; font-weight: bold; color: #2ecc71; margin: 10px 0; }
+        .btn {
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+        .info-section { width: 90%; margin-top: 20px; }
+        .info-item { background: #fff; padding: 15px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>Reward Dashboard</h2>
+    </div>
+
+    <div class="card">
+        <div class="balance-label">Your Current Balance</div>
+        <div class="balance-amount" id="balance">0.00 ETB</div>
+        <button class="btn" onclick="inviteFriend()">🔗 Invite Friends</button>
+    </div>
+
+    <div class="info-section">
+        <div class="info-item">
+            <span>User ID:</span>
+            <span id="user-id">Loading...</span>
+        </div>
+        <div class="info-item">
+            <span>Referrals:</span>
+            <span id="referrals">0</span>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Make the window full screen
+
+        // Get User Data from Telegram
+        const user = tg.initDataUnsafe.user;
+        
+        if (user) {
+            document.getElementById('user-id').innerText = user.id;
+            
+            // Fetch Balance from your Python API
+            fetch(`/api/user/${user.id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.balance !== undefined) {
+                        document.getElementById('balance').innerText = `${data.balance.toFixed(2)} ETB`;
+                    }
+                })
+                .catch(err => console.error("Error fetching balance:", err));
+        }
+
+        function inviteFriend() {
+            const inviteLink = `https://t.me/YOUR_BOT_USERNAME?start=${user.id}`;
+            const shareText = `Join this bot and start earning rewards! 🇪🇹\n${inviteLink}`;
+            
+            // Open Telegram share dialog
+            tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(shareText)}`);
+        }
+    </script>
+</body>
+</html>
